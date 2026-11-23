@@ -1185,6 +1185,19 @@ def test_fundable_catalog_endpoints_are_platform_eligible() -> None:
     assert not ineligible, ineligible
 
 
+def test_smblistings_catalog_endpoints_are_platform_eligible_and_hold_the_worst_case() -> None:
+    from treg.application.call import cost as call_cost
+
+    catalog = catalog_store.load()
+    endpoints = {ep["id"]: ep for ep in catalog.endpoints if ep["provider"] == "smblistings"}
+    assert endpoints
+    ineligible = [i for i, ep in endpoints.items() if not catalog.platform_eligible(ep)]
+    assert not ineligible, ineligible
+    # New listings has no limit parameter and returns up to 100 at $0.02: the hold is $2.00.
+    assert call_cost.worst_case_micro(
+        endpoints["smblistings.companies.for_sale.new"], catalog) == 2_000_000
+
+
 def test_litescrape_ai_overview_unserved_is_free():
     mk = _mk("litescrape", endpoint_id="litescrape.google.serp.ai_overview",
              cost_type="per_success", estimate_micro=150)

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="SMB Listings">
+  <rect width="32" height="32" rx="7" fill="#0F4C3F"/>
+  <path d="M7 27V6h17" fill="none" stroke="#E9EEEB" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12.5 6v4.5M21.5 6v4.5" stroke="#E9EEEB" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="10.5" y="10.5" width="13" height="9" rx="1.6" fill="#F2B42C"/>
+  <path d="M13.5 15h7" stroke="#16211E" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
