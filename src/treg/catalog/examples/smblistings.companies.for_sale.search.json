@@ -1,28 +1,28 @@
 {
   "data": [
     {
-      "id": "lst_177bb3cbda0adb66",
+      "id": "lst_42cad96b2bc8dca0",
       "source": "bizbuysell",
-      "url": "https://www.bizbuysell.com/business-opportunity/fully-operational-carpet-cleaning-franchise/2474817/",
-      "title": "Fully Operational Carpet Cleaning Franchise",
+      "url": "https://www.bizbuysell.com/business-opportunity/cleaning-and-hauling-franchise-clear-lake-houston-est-2011/2436272/",
+      "title": "Cleaning & Hauling Franchise — Clear Lake Houston — Est. 2011",
       "industry": "home_services",
-      "businessType": "specialty_cleaning",
+      "businessType": null,
       "sourceIndustry": "Cleaning Businesses",
       "broker": null,
-      "location": "Corpus Christi, Texas, United States",
+      "location": "Houston, Texas, United States",
       "country": "US",
       "state": "TX",
-      "city": "Corpus Christi",
+      "city": "Houston",
       "currency": "USD",
-      "askingPrice": 149000,
+      "askingPrice": 62500,
       "revenue": null,
-      "cashFlow": null,
+      "cashFlow": 22000,
       "firstSeen": "2026-11-23T19:46:50.236Z",
-      "originalAskingPrice": 149000,
+      "originalAskingPrice": 62500,
       "lastPriceCutAt": null,
       "priceCutCount": 0,
       "duplicateOf": null,
-      "legitimacy": 37,
+      "legitimacy": 42,
       "legitimacyReasons": [
         {
           "code": "source_marketplace",
@@ -30,9 +30,9 @@
           "points": 25
         },
         {
-          "code": "seen_recently",
-          "text": "seen on our runs in the last 7 days",
-          "points": 6
+          "code": "figures",
+          "text": "asking price and cash flow given",
+          "points": 11
         },
         "… 1 more item(s) truncated"
       ],

@@ -22,8 +22,20 @@
     "priceCutCount": 0,
     "removedAt": null,
     "duplicateOf": null,
-    "legitimacy": null,
-    "legitimacyReasons": [],
+    "legitimacy": 46,
+    "legitimacyReasons": [
+      {
+        "code": "source_marketplace",
+        "text": "listed on a paid or vetted marketplace",
+        "points": 25
+      },
+      {
+        "code": "figures",
+        "text": "asking price, cash flow and revenue given",
+        "points": 15
+      },
+      "… 1 more item(s) truncated"
+    ],
     "daysOnMarket": 244,
     "priceCutPercent": null,
     "qualityFlags": [],

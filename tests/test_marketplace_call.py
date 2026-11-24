@@ -1185,17 +1185,21 @@ def test_fundable_catalog_endpoints_are_platform_eligible() -> None:
     assert not ineligible, ineligible
 
 
-def test_smblistings_catalog_endpoints_are_platform_eligible_and_hold_the_worst_case() -> None:
-    from treg.application.call import cost as call_cost
+def test_smblistings_catalog_endpoints_are_platform_eligible_and_hold_the_limit() -> None:
+    from treg.application.call.resolve import QueryValues, price_call
 
     catalog = catalog_store.load()
     endpoints = {ep["id"]: ep for ep in catalog.endpoints if ep["provider"] == "smblistings"}
     assert endpoints
     ineligible = [i for i, ep in endpoints.items() if not catalog.platform_eligible(ep)]
     assert not ineligible, ineligible
-    # New listings has no limit parameter and returns up to 100 at $0.02: the hold is $2.00.
-    assert call_cost.worst_case_micro(
-        endpoints["smblistings.companies.for_sale.new"], catalog) == 2_000_000
+    # Search and new listings hold query.limit listings at $0.02 (25 and 100 when omitted).
+    new = endpoints["smblistings.companies.for_sale.new"]
+    search = endpoints["smblistings.companies.for_sale.search"]
+    since = ("since", "2026-11-20T00:00:00Z")
+    assert price_call(new, QueryValues((since,)), b"", set()).estimate_micro == 2_000_000
+    assert price_call(new, QueryValues((since, ("limit", "5"))), b"", set()).estimate_micro == 100_000
+    assert price_call(search, QueryValues(()), b"", set()).estimate_micro == 500_000
 
 
 def test_litescrape_ai_overview_unserved_is_free():

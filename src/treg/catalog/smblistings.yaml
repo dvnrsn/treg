@@ -5,10 +5,10 @@ source:
   curated: '2026-11-22'
 # Marketplace partner accounts (treg's key) pay per listing returned: 1 credit ($0.02) per search or
 # new-listings result and 3 credits ($0.06) per listing by id. The API holds the most a call can cost
-# up front (search: `limit`; new listings: the 100 it can return; by id: 3), refunds the rest, and
+# up front (search and new listings: `limit`; by id: 3), refunds the rest, and
 # reports the exact charge in the top-level `credits_charged` (credits; 0 for an empty page). An
 # empty page, a 404, a 400 and a 5xx cost nothing. Probe: GET /account is free; a bad key answers 401.
-limits: "120 requests per minute per account across REST and MCP (429 with Retry-After). Search returns at most 100 listings per call, new listings at most 100. HTTP 402 when the credit balance cannot cover the up-front hold."
+limits: "600 requests per minute on the treg partner account (120 is the default for other accounts), across REST and MCP (429 with Retry-After). Search returns at most 100 listings per call, new listings at most 100. HTTP 402 when the credit balance cannot cover the up-front hold."
 pricing_url: https://smblistings.ai/docs#credits
 
 proposed_capabilities:
@@ -78,14 +78,14 @@ endpoints:
     method: GET
     path: /listings/new
     name: New businesses for sale since a date
-    summary: List businesses first seen for sale after a timestamp and still for sale, up to 100 per call, newest first.
+    summary: List businesses first seen for sale after a timestamp and still for sale, newest first, up to `limit` (default and max 100).
     input:
       queryParams:
         since: {type: string, required: true, note: "ISO 8601 timestamp.", example: "2026-11-20T00:00:00Z"}
-    test_request: {queryParams: {since: "2026-11-20T00:00:00Z"}}
-    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned, at most 100; an empty page is free. No limit parameter, so treg holds the 100-listing worst case."}
-    # No row-count parameter to hold against, so the hold is the worst case: 100 listings.
-    settle: {reported: {path: response.credits_charged, unit: usd, scale: 0.02}, worst_case: '2.00'}
+        limit: {type: integer, required: false, default: 100, min: 1, max: 100, note: "Most listings to return, newest first; this is the price dial."}
+    test_request: {queryParams: {since: "2026-11-20T00:00:00Z", limit: 2}}
+    reserve: {rows: {param: query.limit, default: {value: 100, source: docs}, max: 100}}
+    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned; an empty page is free. treg holds limit listings (100 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No new listings; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/new-listings
     verified: '2026-11-23'
