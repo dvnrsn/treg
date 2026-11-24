@@ -1,28 +1,28 @@
 {
   "data": [
     {
-      "id": "lst_42cad96b2bc8dca0",
+      "id": "lst_001b13fc4542e658",
       "source": "bizbuysell",
-      "url": "https://www.bizbuysell.com/business-opportunity/cleaning-and-hauling-franchise-clear-lake-houston-est-2011/2436272/",
-      "title": "Cleaning & Hauling Franchise — Clear Lake Houston — Est. 2011",
+      "url": "https://www.bizbuysell.com/business-opportunity/turnkey-houston-laundromat-175k-in-equipment-and-growth-potential/2436190/",
+      "title": "Turnkey Houston Laundromat, $175K in Equipment & Growth Potential",
       "industry": "home_services",
-      "businessType": null,
-      "sourceIndustry": "Cleaning Businesses",
+      "businessType": "laundromat",
+      "sourceIndustry": "Commercial Laundry",
       "broker": null,
-      "location": "Houston, Texas, United States",
+      "location": "Harris County, Texas, United States",
       "country": "US",
       "state": "TX",
-      "city": "Houston",
+      "city": "Harris County",
       "currency": "USD",
-      "askingPrice": 62500,
+      "askingPrice": 175000,
       "revenue": null,
-      "cashFlow": 22000,
-      "firstSeen": "2026-11-23T19:46:50.236Z",
-      "originalAskingPrice": 62500,
+      "cashFlow": 1719,
+      "firstSeen": "2026-11-24T05:20:15.438Z",
+      "originalAskingPrice": 175000,
       "lastPriceCutAt": null,
       "priceCutCount": 0,
       "duplicateOf": null,
-      "legitimacy": 42,
+      "legitimacy": 32,
       "legitimacyReasons": [
         {
           "code": "source_marketplace",
@@ -34,11 +34,26 @@
           "text": "asking price and cash flow given",
           "points": 11
         },
-        "… 1 more item(s) truncated"
+        "… 2 more item(s) truncated"
       ],
       "daysOnMarket": 0,
       "priceCutPercent": null,
-      "qualityFlags": []
+      "qualityFlags": [
+        "multiple_too_high"
+      ],
+      "sources": [
+        {
+          "source": "bizbuysell",
+          "url": "https://www.bizbuysell.com/business-opportunity/turnkey-houston-laundromat-175k-in-equipment-and-growth-potential/2436190/",
+          "askingPrice": 175000,
+          "revenue": null,
+          "cashFlow": 1719,
+          "firstSeen": "2026-11-24T05:20:15.438Z",
+          "lastSeen": "2026-11-24T05:20:15.438Z",
+          "priceCutCount": 0,
+          "removedAt": null
+        }
+      ]
     }
   ],
   "limit": 1,

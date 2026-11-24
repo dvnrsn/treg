@@ -35,8 +35,8 @@ endpoints:
     input:
       queryParams:
         q: {type: string, required: false, note: "Words to match in the listing title.", example: "laundromat"}
-        industry: {type: string, required: false, note: "One of 26 industry keys from the OpenAPI spec, e.g. saas, restaurants_food, home_services."}
-        businessType: {type: string, required: false, note: "Specific business type key (132 in the OpenAPI spec), e.g. hvac, plumbing, car_wash, dental."}
+        industry: {type: string, required: false, note: "An industry key from the OpenAPI spec, e.g. saas, restaurants_food, home_services."}
+        businessType: {type: string, required: false, note: "A specific business type key from the OpenAPI spec, e.g. hvac, plumbing, car_wash, dental."}
         source: {type: string, required: false, note: "Only listings from this source, e.g. bizbuysell."}
         broker: {type: string, required: false, note: "Words in the brokerage firm's name, case-insensitive.", example: "Sunbelt"}
         country: {type: string, required: false, note: "Two-letter ISO 3166-1 code.", example: "US"}
@@ -53,7 +53,10 @@ endpoints:
         maxMultiple: {type: number, required: false, min: 0, note: "Maximum asking price over annual cash flow, e.g. 4."}
         priceCutWithinDays: {type: integer, required: false, min: 1, max: 365, note: "Only listings whose asking price dropped in the last N days."}
         minDaysOnMarket: {type: integer, required: false, min: 0, max: 3650}
-        sort: {type: string, required: false, default: newest, enum: [newest, price_asc, price_desc, cash_flow_desc, multiple_asc]}
+        sort: {type: string, required: false, default: newest, enum: [newest, price_asc, price_desc, cash_flow_desc, multiple_asc, legitimacy]}
+        minLegitimacy: {type: integer, required: false, min: 0, max: 100, note: "Only listings scoring at least this on legitimacy (how likely a real business still for sale), e.g. 50."}
+        includeJunk: {type: boolean, required: false, default: false, note: "Include listings flagged as junk (placeholders, very old unchanged posts)."}
+        includeDuplicates: {type: boolean, required: false, default: false, note: "Include same-source copies of a listing (each with duplicateOf)."}
         limit: {type: integer, required: false, default: 25, min: 1, max: 100}
         offset: {type: integer, required: false, default: 0, min: 0}
       note: "An unknown filter name answers 400 instead of being ignored."
@@ -62,7 +65,7 @@ endpoints:
     price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned on treg's key; an empty page is free. treg holds limit listings (25 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No matches; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/search-listings
-    verified: '2026-11-23'
+    verified: '2026-11-24'
     example_response: examples/smblistings.companies.for_sale.search.json
     added: '2026-11-24'
 
@@ -79,12 +82,15 @@ endpoints:
       queryParams:
         since: {type: string, required: true, note: "ISO 8601 timestamp.", example: "2026-11-20T00:00:00Z"}
         limit: {type: integer, required: false, default: 100, min: 1, max: 100, note: "Most listings to return, newest first; this is the price dial."}
+        minLegitimacy: {type: integer, required: false, min: 0, max: 100, note: "Only listings scoring at least this on legitimacy (how likely a real business still for sale), e.g. 50."}
+        includeJunk: {type: boolean, required: false, default: false, note: "Include listings flagged as junk (placeholders, very old unchanged posts)."}
+        includeDuplicates: {type: boolean, required: false, default: false, note: "Include same-source copies of a listing (each with duplicateOf)."}
     test_request: {queryParams: {since: "2026-11-20T00:00:00Z", limit: 2}}
     reserve: {rows: {param: query.limit, default: {value: 100, source: docs}, max: 100}}
     price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned on treg's key; an empty page is free. treg holds limit listings (100 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No new listings; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/new-listings
-    verified: '2026-11-23'
+    verified: '2026-11-24'
     example_response: examples/smblistings.companies.for_sale.new.json
     added: '2026-11-24'
 
@@ -96,7 +102,7 @@ endpoints:
     method: GET
     path: /listings/{id}
     name: Business-for-sale listing by ID - price history
-    summary: Get one business-for-sale listing by ID with its source link, broker, financials and full price history, including listings since removed.
+    summary: Get one business-for-sale listing by ID with its source links, broker, financials and full price history, including listings since removed.
     input:
       pathParams:
         id: {type: string, required: true, note: "Listing id from a search or new-listings call."}
@@ -106,6 +112,6 @@ endpoints:
       status: [404]
       means: "No listing with that id; nothing charged."
     docs_url: https://smblistings.ai/docs/api/get-listing
-    verified: '2026-11-23'
+    verified: '2026-11-24'
     example_response: examples/smblistings.companies.for_sale.detail.json
     added: '2026-11-24'

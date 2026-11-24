@@ -39,13 +39,27 @@
     "daysOnMarket": 244,
     "priceCutPercent": null,
     "qualityFlags": [],
+    "sources": [
+      {
+        "source": "tupelo",
+        "url": "https://www.tupelosmb.com/marketplace/listings/cmn59wr48000sif04qy7mrh2d",
+        "askingPrice": 605000,
+        "revenue": 884426,
+        "cashFlow": 173141,
+        "firstSeen": "2026-11-17T07:36:00.160Z",
+        "lastSeen": "2026-11-23T08:32:49.140Z",
+        "priceCutCount": 0,
+        "removedAt": null
+      }
+    ],
     "history": [
       {
         "event": "listed",
         "at": "2026-11-17T07:36:00.160Z",
         "askingPrice": 605000,
         "revenue": 884426,
-        "cashFlow": 173141
+        "cashFlow": 173141,
+        "source": "tupelo"
       }
     ]
   },
