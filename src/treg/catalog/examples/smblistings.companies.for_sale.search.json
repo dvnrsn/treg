@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "id": "lst_177bb3cbda0adb66",
+      "source": "bizbuysell",
+      "url": "https://www.bizbuysell.com/business-opportunity/fully-operational-carpet-cleaning-franchise/2474817/",
+      "title": "Fully Operational Carpet Cleaning Franchise",
+      "industry": "home_services",
+      "businessType": "specialty_cleaning",
+      "sourceIndustry": "Cleaning Businesses",
+      "broker": null,
+      "location": "Corpus Christi, Texas, United States",
+      "country": "US",
+      "state": "TX",
+      "city": "Corpus Christi",
+      "currency": "USD",
+      "askingPrice": 149000,
+      "revenue": null,
+      "cashFlow": null,
+      "firstSeen": "2026-11-23T19:46:50.236Z",
+      "originalAskingPrice": 149000,
+      "lastPriceCutAt": null,
+      "priceCutCount": 0,
+      "duplicateOf": null,
+      "legitimacy": 37,
+      "legitimacyReasons": [
+        {
+          "code": "source_marketplace",
+          "text": "listed on a paid or vetted marketplace",
+          "points": 25
+        },
+        {
+          "code": "seen_recently",
+          "text": "seen on our runs in the last 7 days",
+          "points": 6
+        },
+        "… 1 more item(s) truncated"
+      ],
+      "daysOnMarket": 0,
+      "priceCutPercent": null,
+      "qualityFlags": []
+    }
+  ],
+  "limit": 1,
+  "offset": 0,
+  "credits_charged": 1
+}

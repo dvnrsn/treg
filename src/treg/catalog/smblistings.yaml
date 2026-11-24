@@ -66,6 +66,8 @@ endpoints:
     price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned; an empty page is free. treg holds limit listings (25 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No matches; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/search-listings
+    verified: '2026-11-23'
+    example_response: examples/smblistings.companies.for_sale.search.json
     added: '2026-11-22'
 
   - id: smblistings.companies.for_sale.new
@@ -86,6 +88,8 @@ endpoints:
     settle: {reported: {path: response.credits_charged, unit: usd, scale: 0.02}, worst_case: '2.00'}
     miss: {when: {path: response.data, op: empty}, means: "No new listings; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/new-listings
+    verified: '2026-11-23'
+    example_response: examples/smblistings.companies.for_sale.new.json
     added: '2026-11-22'
 
   - id: smblistings.companies.for_sale.detail
@@ -100,10 +104,12 @@ endpoints:
     input:
       pathParams:
         id: {type: string, required: true, note: "Listing id from a search or new-listings call."}
-    test_request: {pathParams: {id: "TODO_ID"}}
+    test_request: {pathParams: {id: "lst_5b3c7a9a47ccdb18"}}
     price: {value: '0.06', currency: USD, per: 1, unit: call}
     miss:
       status: [404]
       means: "No listing with that id; nothing charged."
     docs_url: https://smblistings.ai/docs/api/get-listing
+    verified: '2026-11-23'
+    example_response: examples/smblistings.companies.for_sale.detail.json
     added: '2026-11-22'

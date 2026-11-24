@@ -1,0 +1,41 @@
+{
+  "data": {
+    "id": "lst_5b3c7a9a47ccdb18",
+    "source": "tupelo",
+    "url": "https://www.tupelosmb.com/marketplace/listings/cmn59wr48000sif04qy7mrh2d",
+    "title": "26-Year Design-Build Landscaping Company | North Dallas TX",
+    "industry": "home_services",
+    "businessType": "landscaping",
+    "sourceIndustry": "Landscaping & Yard Services",
+    "broker": null,
+    "location": "Dallas, Texas, United States",
+    "country": "US",
+    "state": "TX",
+    "city": "Dallas",
+    "currency": "USD",
+    "askingPrice": 605000,
+    "revenue": 884426,
+    "cashFlow": 173141,
+    "firstSeen": "2026-11-17T07:36:00.160Z",
+    "originalAskingPrice": 605000,
+    "lastPriceCutAt": null,
+    "priceCutCount": 0,
+    "removedAt": null,
+    "duplicateOf": null,
+    "legitimacy": null,
+    "legitimacyReasons": [],
+    "daysOnMarket": 244,
+    "priceCutPercent": null,
+    "qualityFlags": [],
+    "history": [
+      {
+        "event": "listed",
+        "at": "2026-11-17T07:36:00.160Z",
+        "askingPrice": 605000,
+        "revenue": 884426,
+        "cashFlow": 173141
+      }
+    ]
+  },
+  "credits_charged": 3
+}

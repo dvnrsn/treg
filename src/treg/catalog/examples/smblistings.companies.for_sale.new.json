@@ -1,0 +1,86 @@
+{
+  "data": [
+    {
+      "id": "lst_8c625c691a7a5d1a",
+      "source": "bizbuysell",
+      "url": "https://www.bizbuysell.com/business-asset/bloomfield-liquor-license-free-and-clear-for-sale/2219321/",
+      "title": "Bloomfield Liquor License Free & Clear for sale",
+      "industry": "retail",
+      "businessType": "liquor_store",
+      "sourceIndustry": null,
+      "broker": null,
+      "location": "Bloomfield, New Jersey, United States",
+      "country": "US",
+      "state": "NJ",
+      "city": "Bloomfield",
+      "currency": "USD",
+      "askingPrice": 150000,
+      "revenue": null,
+      "cashFlow": null,
+      "firstSeen": "2026-11-23T23:01:53.771Z",
+      "originalAskingPrice": 150000,
+      "lastPriceCutAt": null,
+      "priceCutCount": 0,
+      "duplicateOf": null,
+      "legitimacy": 37,
+      "legitimacyReasons": [
+        {
+          "code": "source_marketplace",
+          "text": "listed on a paid or vetted marketplace",
+          "points": 25
+        },
+        {
+          "code": "seen_recently",
+          "text": "seen on our runs in the last 7 days",
+          "points": 6
+        },
+        "… 1 more item(s) truncated"
+      ],
+      "daysOnMarket": 0,
+      "priceCutPercent": null,
+      "qualityFlags": []
+    },
+    {
+      "id": "lst_9b55cfcba19b3d7f",
+      "source": "bizbuysell",
+      "url": "https://www.bizbuysell.com/business-opportunity/lucrative-bar-restaurant-gaming-real-estate-prime-location/2422641/",
+      "title": "Lucrative Bar / Restaurant / Gaming / Real Estate / Prime Location",
+      "industry": "restaurants_food",
+      "businessType": "bar_nightclub",
+      "sourceIndustry": "Bars, Pubs & Taverns",
+      "broker": null,
+      "location": "Nevada, United States",
+      "country": "US",
+      "state": "NV",
+      "city": null,
+      "currency": "USD",
+      "askingPrice": 590000,
+      "revenue": null,
+      "cashFlow": 174993,
+      "firstSeen": "2026-11-23T23:01:53.771Z",
+      "originalAskingPrice": 590000,
+      "lastPriceCutAt": null,
+      "priceCutCount": 0,
+      "duplicateOf": null,
+      "legitimacy": 42,
+      "legitimacyReasons": [
+        {
+          "code": "source_marketplace",
+          "text": "listed on a paid or vetted marketplace",
+          "points": 25
+        },
+        {
+          "code": "figures",
+          "text": "asking price and cash flow given",
+          "points": 11
+        },
+        "… 1 more item(s) truncated"
+      ],
+      "daysOnMarket": 0,
+      "priceCutPercent": null,
+      "qualityFlags": []
+    },
+    "… 98 more item(s) truncated"
+  ],
+  "credits_charged": 100
+}
