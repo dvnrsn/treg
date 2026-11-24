@@ -60,6 +60,9 @@ _TABLE: list[Signature] = [
     Signature("corpoapi", 402, r"spend_cap_reached", "balance", tripwire=True),
     Signature("anymailfinder", 402, r"not have enough credits", "balance", tripwire=True),
     Signature("findymail", 402, r"not enough credits", "balance", tripwire=True),
+    # MillionPhones documents its out-of-credits answer as a 402 carrying billing_url; no other
+    # answer carries that field.
+    Signature("millionphones", 402, r"billing_url", "balance", tripwire=True),
     Signature("leadsforge", 402, r"insufficient_credits", "balance"),
     # MapsData (dashboard API error codes): a scrape submitted with no Scraping Credits left is a 402
     # {"error": {"code": "lead_limit_reached", ...}}; an unpaid renewal pauses submissions with a
@@ -85,6 +88,9 @@ _TABLE: list[Signature] = [
     Signature("jobspipe", 402, r"monthly request quota exceeded", "balance", tripwire=True),
     Signature("jobspipe", 402, r"need the \w+ package or above", "unknown"),
     Signature("jobspipe", 429, r"rate limit exceeded", "burst"),
+    # Forager: its per-key throttle is a 429 {"detail": "Request was throttled. Expected available in 1
+    # second."} with Retry-After.
+    Signature("forager", 429, r"request was throttled", "burst"),
     Signature("thecompaniesapi", 403, r"noCreditsRemaining", "balance", tripwire=True),
     Signature("companyenrich", 402, r"payment required", "balance", tripwire=True),
     Signature("akta", 402, r"insufficient credits", "balance"),

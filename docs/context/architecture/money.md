@@ -318,16 +318,25 @@ it creates no other money movement. A `/tasks/` poll is an ordinary call and set
 ## Allowance: one hold for many calls
 
 Off by default: `money_allowance_org_ids` lists the teams, and the shared key-value store must be
-configured. For a listed team, an eligible call (`reserve._allowance_eligible`) reserves with one
+configured. For a listed team, an eligible call (`reserve._allowance_skip` returns None) reserves with one
 atomic take from the team's allowance counter and touches no balance row, so its calls no longer
 queue on the team's money lease twice each.
 
 Eligible: a direct call (not a child of a route, a hub run or overflow), synchronous, on treg's
-platform key, with no tags, no `Idempotency-Key`, a member with no daily spend limit, a provider
-outside the trial pools, an endpoint any credit may pay for, and a price above zero. Every other
-call keeps its own hold, because something reads that hold: the tag and member rows written with
-it, the async task or routed parent that closes it later, the idempotency check that asks whether
-money moved, the purchased-credit gate.
+platform key, with no tags, a member with no daily spend limit, a provider outside the trial
+pools, an endpoint any credit may pay for, and a price above zero. Every other call keeps its own
+hold, because something reads that hold: the tag and member rows written with it, the async task
+or routed parent that closes it later, the purchased-credit gate. A call with an `Idempotency-Key`
+is eligible too: its claim's stale check, which asks whether money moved, reads the call's
+in-flight mark and queued charge where it would read a hold ("Idempotency and retries").
+
+A listed team's call that keeps its own hold logs why, as one JSON line on its own logger
+(`treg.allowance_skips`): `allowance_skipped {"org_id":..,"reason":..,"calls":..}`, with the reason `_allowance_skip` named (`child_call`, `tagged`, `async`, `in_flight_unmarked`, ...)
+or `take_refused` when an eligible call's take returned it to the exact path. The first skip of a
+team and reason is logged at once, then one line a minute per process with the count since the
+last line, so a listed team whose calls never reach the allowance says which rule kept them out.
+`calls` counts calls sent to the exact path, before its reserve runs: a call that path then
+refuses (short balance, a cap) is counted too, so it is not the number of holds written.
 
 `application/call/allowance.py` is the whole runtime:
 
@@ -1009,7 +1018,9 @@ never a Stripe coupon.
 purchased block stays exactly what the card paid: purchased credit is a refundable liability, the
 bonus is marketing spend. The billing page shows the bonus each refill earns and the next tier up.
 The grant's meta carries `payment_intent`, `pct` and `topup_block_id`, which `topup_history` joins
-to show `bonus_micro`.
+to show `bonus_micro`. The partner offer of the affiliate program is another `bonus` grant naming its
+payment (`source: affiliate_bonus`, [affiliates](affiliates.md) "Partner offer"), so a refund revokes
+it the same way; `topup_history` does not show it.
 
 `_grant_topup_bonus` grants per payment, not per first delivery: every delivery, and the inline
 auto-top-up credit, grants when no `topup_bonus` entry names the PaymentIntent. A lock on the
@@ -1447,8 +1458,34 @@ still pay the provider twice.
   at once.
 - Replays return `X-Treg-Idempotent-Replay: true`, `X-Treg-Cost-Micro: 0` and the first figure in
   `X-Treg-Original-Cost-Micro`; MCP returns `replayed: true`.
-- Refusal and cancellation cleanup return an acquired label; expired entries are swept lazily per
-  caller at claim time, skipping locked rows.
+- Refusal and cancellation cleanup return an acquired label, except a cancelled call whose
+  allowance charge was already handed to the charge writer (`allowance_charged`): that charge is
+  written whatever happens to the request, so the label stays pending for the stale check.
+  Expired entries are swept lazily per caller at claim time, skipping locked rows.
+- A stale claim's money (`_money_of`) is read from the owner's holds, its ledger entries and its
+  queued `CallCharge` row, read before the ledger: a call on the allowance has no hold of its own,
+  and its charge waits in the queue until a fold writes its settle. A queued charge with no settle
+  yet is money in flight (409): its amount is what the team owes, and the fold may take less when
+  the credit runs short, so the receipt waits for the settle.
+  The ledger read is bounded to the owner's lifetime, except by exact id (the `call_id` index):
+  the owner's own entries and its async tasks' are read past it, since a fold delayed by a backlog
+  or a task's worker can settle later.
+- An allowance call has no hold to show it is still running, so a stale claim also asks the shared
+  store for the owner's in-flight mark (`kv.call_in_flight`, `IN_FLIGHT_MARK_MS`): a mark, or a
+  store that cannot answer, is money in flight (409) like an open hold, unless the ledger already
+  speaks for the owner: an entry of its own (a reserve, so it took a hold; a settle, so its
+  allowance charge is folded) or of a child other than `:overflow` (routed and hub parents never
+  take the allowance). Its money is then all in the database, and a store fault does not hold up
+  its receipt. An overflow child's entries do not count: its parent's own charge may be unwritten. The mark is read before the database, since it is cleared only
+  once the charge is written. `_platform_reserve` with
+  `mark_in_flight` sets the mark before the take and clears it when the take is refused; a call
+  the store would not mark keeps its own hold (`in_flight_unmarked`). The claim's lease task
+  renews it (only while it is there). A call charged nothing clears it in `allowance.finish`; a
+  charge hands it to the charge writer, which sets every mark it holds again on its own clock
+  (`_MARK_RENEW_S`), queued, being written or unconfirmed alike (set, not only extended, so a
+  store that restarted gets them back within one period), and clears one only once its charge
+  is known written, even after the call has answered or been cancelled.
+  A process that dies leaves it to expire before the claim reads stale.
 - A reserve admission 429 never reaches `_store_idempotent`; `_stamp_call_exit` releases its pending
   claim (both MCP surfaces too). If that cleanup fails twice, the row stays pending until the
   stale-claim resolver stores 410 `idempotency_outcome_unknown` when no money evidence exists.

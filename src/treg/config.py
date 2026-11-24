@@ -142,6 +142,38 @@ def _parse_compare_pairs(raw: str) -> dict[str, list[tuple[str, str]]]:
     return out
 
 
+RANKING_TIERS = ("good", "bad")
+
+
+def _parse_ranking_tiers(raw: str) -> dict[str, dict[str, str]]:
+    if not raw.strip():
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except ValueError:
+        raise ValueError("ranking_tiers must be a JSON object") from None
+    message = ("ranking_tiers must map capabilities to {\"good\": [...], \"bad\": [...]} lists of "
+               'lowercase providers, each provider in one list, e.g. {"web.extract": {"good": ["a"], "bad": ["b"]}}')
+    if not isinstance(parsed, dict):
+        raise ValueError(message)
+    out: dict[str, dict[str, str]] = {}
+    for capability, tiers in parsed.items():
+        if not (isinstance(capability, str) and _CAPABILITY_NAME.fullmatch(capability)
+                and isinstance(tiers, dict) and set(tiers) <= set(RANKING_TIERS)):
+            raise ValueError(message)
+        named: dict[str, str] = {}
+        for tier, providers in tiers.items():
+            if not (isinstance(providers, list)
+                    and all(isinstance(p, str) and _PROVIDER_NAME.fullmatch(p) for p in providers)):
+                raise ValueError(message)
+            for p in providers:
+                if p in named:
+                    raise ValueError(message)
+                named[p] = tier
+        out[capability] = named
+    return out
+
+
 class Settings(BaseSettings):
     # Most of these values are credentials: a validation error names the field, never the value.
     model_config = SettingsConfigDict(env_file=".env", env_prefix="TREG_", extra="ignore",
@@ -188,6 +220,7 @@ class Settings(BaseSettings):
     mark_hint_capabilities: list[str] = Field(default_factory=list)
     mark_hint_per_hour: int = Field(default=3, ge=1)
     mark_hint_texts: list[str] = Field(default_factory=list)
+    ranking_tiers: str = ""
     # Pairwise comparisons (application/compare.py, docs feedback.md "Pairwise comparisons"): the
     # hourly `treg-worker compare collect` run asks the other vendor of a configured pair the input
     # of a recent routed call the call path marked as sampled, on treg's key, and the team's agent is later invited to judge
@@ -585,6 +618,10 @@ class Settings(BaseSettings):
     platform_key_trestleiq: str = ""       # raw key; exact lowercase x-api-key header
     platform_key_hlrlookup: str = ""         # JSON body api_key; prepaid lookup credits, 1 per mobile lookup
     platform_key_hlrlookup_secret: str = ""  # JSON body api_secret paired with it — BOTH must be set
+    platform_key_descovo: str = ""  # Bearer key; monthly plan credits, free balance on /v1/credits
+    platform_key_millionphones: str = ""  # x-api-key header; plan credits, free balance on /v1/credits
+    platform_key_forager: str = ""          # X-API-KEY header; monthly plan credits, free balance on /api/users/current/
+    platform_key_forager_account: str = ""  # the account id bound to that key, filled into every path — BOTH must be set
     # (tomba's data routes need the header pair; TOMBA.platform_extra_setting names this second slot)
     platform_key_influencersclub: str = ""  # Bearer key (dashboard JWT); creator discovery + enrichment, fx.yaml $0.598/credit
     platform_key_crustdata: str = ""  # Bearer key; every call also needs the pinned x-api-version header
@@ -724,6 +761,10 @@ class Settings(BaseSettings):
     typesafe_url: str = "https://api.typesafe.ai/v1/systemone"
     # Past this the search answers from the baseline alone; the row records `judge_error=timeout`.
     typesafe_timeout_s: float = 2.5
+    # Review judging (application.review_judge): reviews per Jev request, and how long one request may
+    # take. It runs from a cron, so its wait is not a caller's.
+    review_judge_batch: int = Field(default=25, ge=1, le=100)
+    review_judge_timeout_s: float = 60.0
     # "Find tools for a job" (application.catalog_find): the same judge served to PEOPLE on the
     # dashboard's Catalog page and the public /search page. Its recall is wider than the MCP
     # experiment's: the judge scores a request's candidates in parallel, so 60 costs no more wall
@@ -963,6 +1004,11 @@ class Settings(BaseSettings):
     # same value entered in that agent's Microsoft OAuth registration. Empty = the client does not
     # exist.
     m365_client_secret: str = ""
+    # The vendor console's OAuth client (`treg-vendor-console`): a separate service where API vendors
+    # sign in with their treg account to apply for a listing. Its secret, and its one redirect URI
+    # (matched exactly). Either empty = the client does not exist.
+    vendor_console_client_secret: str = ""
+    vendor_console_redirect_uri: str = ""
 
     # Agent payments (docs/context/architecture/agent-payments.md): a caller with no treg
     # credential pays a catalog call with MPP (Tempo charge) or x402 (`exact`). Off by default.
@@ -1268,6 +1314,10 @@ class Settings(BaseSettings):
     # Dub requires a country on a lead created without a click. The request's `CF-IPCountry` is used
     # when present; this is the fallback. It shapes Dub's partner analytics only, never money.
     dub_default_country: str = "US"
+    # The most bonus credit one paid top-up can earn from a partner offer set in Dub, whatever the
+    # offer says. A typo in Dub ($500 for $5, 200% for 20%) is then a bounded mistake, not a free
+    # balance. The offer's minimum top-up is the friend referral's (`referral_min_topup_micro`).
+    affiliate_bonus_max_micro: int = 50_000_000  # $50
 
     linkedin_client_id: str = ""
     linkedin_client_secret: str = ""
@@ -1390,6 +1440,16 @@ class Settings(BaseSettings):
     def _compare_pairs_shape(cls, v: str) -> str:
         _parse_compare_pairs(v)  # raises ValueError on a malformed value
         return v
+
+    @field_validator("ranking_tiers")
+    @classmethod
+    def _ranking_tiers_shape(cls, v: str) -> str:
+        _parse_ranking_tiers(v)
+        return v
+
+    @property
+    def ranking_tier_map(self) -> dict[str, dict[str, str]]:
+        return _parse_ranking_tiers(self.ranking_tiers)
 
     @property
     def compare_pair_map(self) -> dict[str, list[tuple[str, str]]]:

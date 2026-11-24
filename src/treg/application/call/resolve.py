@@ -415,6 +415,12 @@ class MarketplaceCall:
     holdless: bool = False
     # Reserved from the team's allowance counter of this epoch, not a hold (money.md "Allowance").
     allowance_epoch: int | None = None
+    # That reserve marked the call in flight in the shared store (a keyed call): cleared once its
+    # charge is written.
+    allowance_marked: bool = False
+    # Its allowance charge was handed to the charge writer, which writes it whatever then happens
+    # to the request: a cancel from here on keeps the call's idempotency claim.
+    allowance_charged: bool = False
     # An overflow child reserve started for this parent: its `{call_ref}:overflow` hold may exist.
     overflow_hold_possible: bool = False
     # Admitted through an active capacity lock as its probe (domain.capacity.marks): a 2xx clears
@@ -1284,7 +1290,8 @@ def _marketplace_upstream(
     ep: dict, provider, query_params, authorization_method: str = "",
 ) -> tuple[str, set[str]]:
     """The full upstream URL for an endpoint-id call, with `{placeholder}` path params filled from
-    the caller's query params (they are consumed — dropped from the relayed query). Missing
+    the caller's query params (they are consumed — dropped from the relayed query). A placeholder
+    the provider's credential fills (`credential_path_params`) stays for the relay. Missing
     required params fail HERE, before a credential is touched or money spent."""
     path = (ep.get("authorization_paths") or {}).get(authorization_method) or ep["path"] or "/"
     inp = ep.get("input") or {}
@@ -1299,7 +1306,11 @@ def _marketplace_upstream(
                         f"{ep['id']} does not accept {name} with {authorization_method}; "
                         f"choose {', '.join(allowed)} or remove {name}"))
     consumed = set()
+    credential_filled = getattr(provider, "credential_path_params", frozenset())
     for name in re.findall(r"{(\w+)}", path):
+        if name in credential_filled:
+            consumed.add(name)  # the relay fills it from the credential; a caller value is dropped
+            continue
         value = query_params.get(name)
         if value is None:
             raise ResolutionFailed(

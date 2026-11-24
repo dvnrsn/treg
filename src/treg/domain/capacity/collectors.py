@@ -849,6 +849,23 @@ async def _hlrlookup(c, key):
     return {"value": float(balance), "unit": "credits", "note": ""}
 
 
+async def _forager(c, key):
+    # Free: GET /api/users/current/ spends nothing, needs no account id in the path and answers 403
+    # for a bad key. The key's one account carries the plan's credit balance.
+    d = await _get(c, "https://api-v2.forager.ai/api/users/current/", headers={"X-API-KEY": key})
+    accounts = d.get("accounts") if isinstance(d, dict) else None
+    sub = (accounts[0] or {}).get("subscription") if isinstance(accounts, list) and accounts else None
+    try:
+        balance = Decimal(str(sub.get("credits_balance"))) if isinstance(sub, dict) else None
+    except (InvalidOperation, ValueError):
+        balance = None
+    if balance is None or not balance.is_finite():
+        raise ValueError("Forager returned no credit balance")
+    tier = (sub.get("subscription_tier") or {}).get("name", "?")
+    return {"value": float(balance), "unit": "credits",
+            "note": f"plan {tier}, subscription {'active' if sub.get('is_active') else 'inactive'}"}
+
+
 async def _predictleads(c, key):
     # The platform slot holds base64("api_key:api_token") for HTTP Basic — pass it straight through.
     d = await _get(c, "https://predictleads.com/api/v3/api_subscription",
@@ -874,6 +891,25 @@ async def _anymailfinder(c, key):
     if isinstance(credits, bool) or not isinstance(credits, int) or credits < 0:
         raise ValueError("Anymail Finder account returned an invalid credit balance")
     return {"value": credits, "unit": "credits", "note": ""}
+
+
+async def _descovo(c, key):
+    # Free: GET /v1/credits never charges; the plan's monthly credits reset on resetsOn.
+    d = await _get(c, "https://api.descovo.com/v1/credits", headers={"Authorization": f"Bearer {key}"})
+    data = d.get("data") if isinstance(d, dict) else None
+    credits = _finite(data.get("available")) if isinstance(data, dict) else None
+    if credits is None:
+        raise ValueError("Descovo returned no credit balance")
+    return {"value": credits, "unit": "credits", "note": f"resets {data.get('resetsOn') or '?'}"}
+
+
+async def _millionphones(c, key):
+    # Free: GET /v1/credits never charges and reports what is left to spend now.
+    d = await _get(c, "https://millionphones.com/v1/credits", headers={"x-api-key": key})
+    credits = _finite(d.get("remaining")) if isinstance(d, dict) else None
+    if credits is None:
+        raise ValueError("MillionPhones returned no credit balance")
+    return {"value": credits, "unit": "credits", "note": f"plan {d.get('plan') or '?'}"}
 
 
 async def _enrow(c, key):
@@ -1178,6 +1214,9 @@ BALANCE_ROUTES = {
     "predictleads": _predictleads,
     "tomba": _tomba,
     "hlrlookup": _hlrlookup,
+    "forager": _forager,
+    "millionphones": _millionphones,
+    "descovo": _descovo,
     "dataforseo": _dataforseo,
     "tikhub": _tikhub,
     "tinyfish": _tinyfish,
@@ -1291,7 +1330,7 @@ NO_BALANCE_API = {
 
 # platform_key_* slots that are the SECOND half of a provider's credential pair, not a provider of
 # their own (see OAuthProvider.platform_extra_setting) — they must not become report rows.
-AUX_SLOTS = {"tomba_secret", "hlrlookup_secret"}
+AUX_SLOTS = {"tomba_secret", "hlrlookup_secret", "forager_account"}
 
 # Vendors that keep answering calls past a zero balance and bill the overage. A reading below
 # `EMPTY_BELOW` from one of them is `_overdrawn`, never exact: exact, it would refuse calls the
