@@ -3,12 +3,8 @@ source:
   docs: https://smblistings.ai/docs
   openapi: https://smblistings.ai/openapi.json
   curated: '2026-11-22'
-# Marketplace partner accounts (treg's key) pay per listing returned: 1 credit ($0.02) per search or
-# new-listings result and 3 credits ($0.06) per listing by id. The API holds the most a call can cost
-# up front (search and new listings: `limit`; by id: 3), refunds the rest, and
-# reports the exact charge in the top-level `credits_charged` (credits; 0 for an empty page). An
-# empty page, a 404, a 400 and a 5xx cost nothing. Probe: GET /account is free; a bad key answers 401.
-limits: "600 requests per minute on the treg partner account (120 is the default for other accounts), across REST and MCP (429 with Retry-After). Search returns at most 100 listings per call, new listings at most 100. HTTP 402 when the credit balance cannot cover the up-front hold."
+# Each response reports its exact charge in top-level `credits_charged` (partner credits of $0.02).
+limits: "Per-account rate limit across REST and MCP (429 with Retry-After). Search returns at most 100 listings per call, new listings at most 100. HTTP 402 when the credit balance cannot cover the up-front hold."
 pricing_url: https://smblistings.ai/docs#credits
 
 proposed_capabilities:
@@ -35,7 +31,7 @@ endpoints:
     method: GET
     path: /listings/search
     name: Search businesses for sale - price, revenue, cash flow
-    summary: One search across BizBuySell, Flippa and 80+ broker sites, deduped, with price history, asking price, revenue and cash flow.
+    summary: One search across BizBuySell, Flippa and other public marketplaces and broker sites, deduped, with asking price, revenue, cash flow and price history.
     input:
       queryParams:
         q: {type: string, required: false, note: "Words to match in the listing title.", example: "laundromat"}
@@ -63,12 +59,12 @@ endpoints:
       note: "An unknown filter name answers 400 instead of being ignored."
     test_request: {queryParams: {state: "TX", industry: "home_services", limit: 1}}
     reserve: {rows: {param: query.limit, default: {value: 25, source: docs}, max: 100}}
-    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned; an empty page is free. treg holds limit listings (25 when omitted)."}
+    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned on treg's key; an empty page is free. treg holds limit listings (25 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No matches; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/search-listings
     verified: '2026-11-23'
     example_response: examples/smblistings.companies.for_sale.search.json
-    added: '2026-11-22'
+    added: '2026-11-24'
 
   - id: smblistings.companies.for_sale.new
     capability: companies.for_sale.new
@@ -78,19 +74,19 @@ endpoints:
     method: GET
     path: /listings/new
     name: New businesses for sale since a date
-    summary: List businesses first seen for sale after a timestamp and still for sale, newest first, up to `limit` (default and max 100).
+    summary: List businesses first seen for sale after a timestamp and still for sale, newest first.
     input:
       queryParams:
         since: {type: string, required: true, note: "ISO 8601 timestamp.", example: "2026-11-20T00:00:00Z"}
         limit: {type: integer, required: false, default: 100, min: 1, max: 100, note: "Most listings to return, newest first; this is the price dial."}
     test_request: {queryParams: {since: "2026-11-20T00:00:00Z", limit: 2}}
     reserve: {rows: {param: query.limit, default: {value: 100, source: docs}, max: 100}}
-    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned; an empty page is free. treg holds limit listings (100 when omitted)."}
+    price: {value: '0.02', currency: USD, per: 1, unit: result, note: "$0.02 per listing returned on treg's key; an empty page is free. treg holds limit listings (100 when omitted)."}
     miss: {when: {path: response.data, op: empty}, means: "No new listings; nothing charged."}
     docs_url: https://smblistings.ai/docs/api/new-listings
     verified: '2026-11-23'
     example_response: examples/smblistings.companies.for_sale.new.json
-    added: '2026-11-22'
+    added: '2026-11-24'
 
   - id: smblistings.companies.for_sale.detail
     capability: companies.for_sale.detail
@@ -105,11 +101,11 @@ endpoints:
       pathParams:
         id: {type: string, required: true, note: "Listing id from a search or new-listings call."}
     test_request: {pathParams: {id: "lst_5b3c7a9a47ccdb18"}}
-    price: {value: '0.06', currency: USD, per: 1, unit: call}
+    price: {value: '0.06', currency: USD, per: 1, unit: call, note: "$0.06 per listing on treg's key; a 404 is free."}
     miss:
       status: [404]
       means: "No listing with that id; nothing charged."
     docs_url: https://smblistings.ai/docs/api/get-listing
     verified: '2026-11-23'
     example_response: examples/smblistings.companies.for_sale.detail.json
-    added: '2026-11-22'
+    added: '2026-11-24'
